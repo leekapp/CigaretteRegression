@@ -23,7 +23,7 @@ We examined models predicting CO yield based on tar, nicotine, and weight, as we
 
 ## Correlation of Predictors and the Problem of Collinearity
 
-![Correlation plot for cigarette data](/Users/leekapp/Desktop/STAT288CigProject/images/corrplot.png)
+![Correlation plot for cigarette data](stat288CigProject/images/corrplot.png)
 The correlation between tar and nicotine is 0.96 and that between tar and CO is 0.97. Therefore, tar and nicotine are associated, as are tar and CO, as if tar is the progenitor of both nicotine and CO, or these chemicals are all derived from the same source. The correlation between nicotine and CO is 0.93, however, this relationship is distorted by the association between tar and nicotine.  The partial correlation between tar and CO whjile controlling for nicotine is reduced to 0.71, but the partial correlation between nicotine and CO while controlling for tar is reduced much more to 0.04.  Thus, there is no association between nicotine and CO in the absence of the association between nicotine and tar.  For these reasons, tar should be the variable of interest when it comes to predicting a cigarette's CO yield.  Furthermore, in the model including tar, weight, and nicotine, the only significant predictor of CO yield is tar.
 
 Collinearity of predictor variables is evident based on the variance inflation factors (VIFs). In the model with all three predictors, weight has a neutral VIF of 1.09, but tar and nicotine show very strong collinearity with VIFs of 12.74 and 12.76, respectively. This reflects the strong correlation between tar and nicotine mentioned above. In the model with both weight and tar, the VIF of tar is 137.67 and that for the interaction term tar:weight is 158.86.  Weight in this model including tar has a VIF of 7.10.  These metrics imply that a heavier cigarette has more tar and it is the tar that accounts for that cigarette's CO yield.
@@ -33,6 +33,6 @@ Collinearity of predictor variables is evident based on the variance inflation f
 CO = 1.4128 + 0.9281(Tar)  
 R<sup>2</sup> = 0.9335  
 F statistic = 308.6 on 1 and 22 DF (p-value: 1.964 x 10<sup>-14</sup>)  
-![Plot of CO by tar fit by model with tar as the only predictor](/Users/leekapp/Desktop/STAT288CigProject/images/tarOnly.png)
+![Plot of CO by tar fit by model with tar as the only predictor](STAT288CigProject/images/tarOnly.png)
 The model with tar as the sole predictor is the best model.  Including nicotine, the only other significant predictor when present alone, plus the interaction term tar:nicotine raises the R<sup>2</sup> by 1.1% to 0.9342.  Given the absence of any real improvement in the model's accuracy and the strong correlation between tar and nicotine, it is unclear that nicotine is independently predicting CO yield in this more complicated model.  Thus, we favor the simplest but effective model with tar as the only predictor of CO yield.
-![Plot of residuals for tar only model](/Users/leekapp/Desktop/STAT288CigProject/images/tarOnlyResids.png) ![Plot of leverages for tar only model](/Users/leekapp/Desktop/STAT288CigProject/images/tarOnlyLevs.png) ![Plot of Cook's distances for tar only model](/Users/leekapp/Desktop/STAT288CigProject/images/tarOnlyCooks.png)
+![Plot of residuals for tar only model](STAT288CigProject/images/tarOnlyResids.png) ![Plot of leverages for tar only model](STAT288CigProject/images/tarOnlyLevs.png) ![Plot of Cook's distances for tar only model](STAT288CigProject/images/tarOnlyCooks.png)
