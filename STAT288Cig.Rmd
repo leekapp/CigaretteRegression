@@ -12,7 +12,7 @@ library(tidyverse); library(skimr); library(gridExtra); library(car); library(co
 
 ### Data Import
 ```{r import}
-cigs<-read.csv("/Users/leekapp/Desktop/STAT288CigProject/cigarette.csv")
+cigs<-read.csv("/Users/leekapp/Documents/Portfolio/STAT288CigProject/cigarette.csv")
 ```
 
 ### Descriptive statistics
@@ -263,7 +263,7 @@ vif(allthree)
 
 ### Corplot Without Bull Durham
 ```{r corr}
-pdf("/Users/leekapp/Desktop/STAT288CigProject/corrplot.png")
+pdf("/Users/leekapp/Documents/Portfolio/STAT288CigProject/corrplot.pdf")
 corrplot(cor(cleanCigs[c(2:5)]), method = "square", addCoef.col = "red")
 dev.off()
 # expect multicollinearity between tar and nicotine
@@ -299,22 +299,23 @@ ggplot(data = cleanCigs, mapping = aes(x = BRAND, y = taronly$residuals)) +
   geom_hline(aes(yintercept = 0), color = "red") +
   labs(title = "Residuals for Tar-Only Model", x = "Brand", y = "Residuals") +
   theme(axis.text.x = element_text(hjust = 1, vjust = 0.25, angle = 90, size = 11))
-ggsave("/Users/leekapp/Desktop/STAT288CigProject/tarOnlyResids.png")
+ggsave("/Users/leekapp/Documents/Portfolio/STAT288CigProject/images/tarOnlyResids.png")
 
 ggplot(data = cleanCigs, mapping = aes(x = BRAND, y = hatvalues(taronly))) +
   geom_point() +
   theme_minimal(base_size = 14) +
   geom_hline(aes(yintercept = mean(hatvalues(taronly)), linetype = "mean leverage"), color = "red") +
   labs(title = "Leverages for Tar-Only Model", x = "Brand", y = "Leverages") +
-  theme(axis.text.x = element_text(hjust = 1, vjust = 0.25, angle = 90, size = 11))
-ggsave("/Users/leekapp/Desktop/STAT288CigProject/tarOnlyLevs.png")
+  theme(axis.text.x = element_text(hjust = 1, vjust = 0.25, angle = 90, size = 11)) +
+  theme(legend.title = element_blank())
+ggsave("/Users/leekapp/Documents/Portfolio/STAT288CigProject/images/tarOnlyLevs.png")
 
 ggplot(data = cleanCigs, mapping = aes(x = BRAND, y = cooks.distance(taronly))) +
   geom_point() +
   theme_minimal(base_size = 14) +
   labs(title = "Cook's Distances for Tar-Only Model", x = "Brand", y = "Cook's Distance") +
   theme(axis.text.x = element_text(hjust = 1, vjust = 0.25, angle = 90, size = 11))
-ggsave("/Users/leekapp/Desktop/STAT288CigProject/tarOnlyCooks.png")
+ggsave("/Users/leekapp/Documents/Portfolio/STAT288CigProject/images/tarOnlyCooks.png")
 ```
 
 
