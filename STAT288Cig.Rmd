@@ -1,0 +1,321 @@
+---
+title: "STAT288 Multiple Regression of FTC Cigarette Data"
+author: "Lee Kapp"
+date: "5/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse); library(skimr); library(gridExtra); library(car); library(corrplot); library(ppcor)
+```
+
+### Data Import
+```{r import}
+cigs<-read.csv("/Users/leekapp/Desktop/STAT288CigProject/cigarette.csv")
+```
+
+### Descriptive statistics
+```{r stats}
+sumTar <- summary(cigs$TAR)
+sumNic <- summary(cigs$NICOTINE)
+sumWt <- summary(cigs$WEIGHT)
+sumCO <- summary(cigs$CO)
+
+statsDF <- rbind(Tar = c(round(sumTar[1], 2), round(sumTar[4], 2), round(sd(cigs$TAR), 2), round(sumTar[6], 2)),
+                Nicotine = c(round(sumNic[1], 2), round(sumNic[4], 2), round(sd(cigs$NICOTINE), 2), round(sumNic[6], 2)),
+                Weight = c(round(sumWt[1], 2), round(sumWt[4], 2), round(sd(cigs$WEIGHT), 2), round(sumWt[6], 2)),
+                CO = c(round(sumCO[1], 2), round(sumCO[4], 2), round(sd(cigs$CO), 2), round(sumCO[6], 2)))
+statsDF <- as.data.frame(statsDF)
+colnames(statsDF) <-  c("Min", "Mean", "Std Dev", "Max")
+rownames(statsDF) <- c("Tar (g)", "Nicotine (g)", "Weight (g)", "CO (mg)")
+statsDF <- t(statsDF)
+statsDF
+```
+
+
+### EDA Plots
+```{r EDAplots}
+# by weight
+p1 <- ggplot(data = cigs, mapping = aes(x = TAR, y = NICOTINE, color = WEIGHT)) +
+  geom_point(size = 2)+
+  labs(title = "Nicotine vs. Tar Content by Weight", x = "Tar (g)", y = "Nicotine (g)") +
+  theme_minimal()
+
+p2 <- ggplot(data = cigs, mapping = aes(x = TAR, y = CO, color = WEIGHT)) +
+  geom_point(size = 2)+
+  labs(title = "CO vs. Tar Content by Weight", x = "Tar (g)", y = "CO (mg)") +
+  theme_minimal()
+
+grid.arrange(p1,p2, nrow=1)
+
+# by tar
+p3 <- ggplot(data = cigs, mapping = aes(x = NICOTINE, y = CO, color = TAR)) +
+  geom_point(size = 2)+
+  labs(title = "CO vs. Nicotine Content by Tar", x = "Nicotine (g)", y = "CO (mg)") +
+  theme_minimal()
+
+p4 <- ggplot(data = cigs, mapping = aes(x = WEIGHT, y = CO, color = TAR)) +
+  geom_point(size = 2)+
+  labs(title = "CO Content vs. Cigarette Weight by Tar", x = "Cigarette weight (g)", y = "CO (mg)") +
+  theme_minimal()
+
+p5 <- ggplot(data = cigs, mapping = aes(x = BRAND, y = CO, color = TAR)) +
+  geom_point(size = 2)+
+  labs(title = "CO yYield by Tar Content", x = "Cigarette Brand", y = "CO (mg)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust=1, vjust = 0.25, angle = 90, size = 11))
+
+
+grid.arrange(p3, p4, nrow=1)
+p5
+
+#by nicotine
+p6 <- ggplot(data = cigs, mapping = aes(x = TAR, y = CO, color = NICOTINE)) +
+  geom_point(size = 2)+
+  labs(title = "CO vs. Tar Content by Nicotine", x = "Tar (g)", y = "CO (mg)") +
+  theme_minimal()
+
+p7 <- ggplot(data = cigs, mapping = aes(x = BRAND, y = CO, color = NICOTINE)) +
+  geom_point(size = 2)+
+  labs(title = "CO Yield by Nicotine", x = "Cigarette Brand", y = "CO (mg)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust=1, vjust = 0.25, angle = 90, size = 11))
+
+p6
+p7
+
+#by CO
+p8 <- ggplot(data = cigs, mapping = aes(x = WEIGHT, y = TAR, color = CO)) +
+  geom_point(size = 2)+
+  labs(title = "Tar Content vs. Weight by CO", x = "Weight (g)", y = "Tar (g)") +
+  theme_minimal() #Might have heaviest weight as an outlier
+
+p9 <- ggplot(data = cigs, mapping = aes(x = BRAND, y = TAR, color = CO)) +
+  geom_point(size = 2)+
+  labs(title = "Tar Content by CO Yield", x = "Cigarette Brand", y = "Tar (g)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust=1, vjust = 0.25, angle = 90, size = 11))
+p8
+p9
+
+```
+
+### Corplot with Bull Durham
+```{r corr}
+corrplot(cor(cigs[-1]), method = "square", addCoef.col = "red")
+# expect multicollinearity between tar and nicotine
+
+# Partial correlation tests with Bull Durham sammple
+# Correlation between CO and TAR controlling for Nicotine
+pcor.test(cigs$CO, cigs$TAR, cigs["NICOTINE"])
+# Correlation between CO and Nicotine controlling for Tar
+pcor.test(cigs$CO, cigs$NICOTINE, cigs["TAR"])
+# Correlation between CO and Weight controlling for Tar and Nicotine
+pcor.test(cigs$CO, cigs$WEIGHT, cigs[,c("TAR","NICOTINE")])
+```
+
+### Complete Model
+```{r completeMod}
+totMod<-(lm(CO~TAR+NICOTINE+WEIGHT, data = cigs))
+summary(totMod)
+print("Variance Inflation Factors")
+vif(totMod)
+print("Leverages")
+hatvalues(totMod)
+summary(hatvalues(totMod))
+print("Cook's Distances")
+cooks.distance(totMod)
+
+# max values
+which.max(hatvalues(totMod))
+which.max(cooks.distance(totMod)) #3 is Bull Durham
+```
+
+### Tar only model
+```{r tarMod}
+tarAlone<-(lm(CO~TAR, data = cigs))
+summary(tarAlone)
+plot(tarAlone) #outputs diagnostic plots - Bull Durham has excessive Cook's distance
+ggplot(data = cigs, mapping = aes(y = TAR)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Tar") +
+  theme_minimal()
+summary(cigs$TAR)
+1.5*(15.1-8.6) + 15.1 #24.85 is max non-outlier for TAR, Bull Durham is 29.8 mg
+rstudent(tarAlone) # BullDurham value is -3.722 = an outlier
+```
+
+### Nicotine only model
+```{r nicMod}
+nicAlone<-(lm(CO~NICOTINE, data = cigs))
+summary(nicAlone)
+```
+
+### Weight only model
+```{r wtMod}
+wtAlone<-(lm(CO~WEIGHT, data = cigs))
+summary(wtAlone)
+```
+
+### Nicotine and weight plus interaction term
+```{r nicWt}
+nicwt<-lm(CO~NICOTINE + WEIGHT + NICOTINE:WEIGHT, data = cigs)
+summary(nicwt)
+
+# predictions based on the model with interaction term to show fit in plot
+cigs$NWpreds <- predict(nicwt, cigs)
+
+ggplot(data = cigs, mapping = aes(y = CO, x = NICOTINE)) +
+  geom_point() +
+  geom_smooth(aes(y = NWpreds, x = NICOTINE), method = "lm", se = TRUE, color = "red") +
+  labs(title = "CO by Nicotine + Weight + Nicotine:Weight") +
+  theme_minimal()
+
+ggplot(data = cigs, mapping = aes(y = hatvalues(nicwt), x = BRAND)) +
+  geom_point() +
+  theme_minimal() +
+  geom_hline(aes(yintercept = mean(hatvalues(nicwt)), linetype = "mean leverage"), color = "red") +
+  theme(legend.title = element_blank()) +
+  theme(axis.text.x = element_text(hjust=1, vjust = 0.25, angle = 90, size = 11))
+
+hatvalues(nicwt)
+meanLevClean<-mean(hatvalues(nicwt))
+meanLevClean
+par(mfrow = c(2,2))
+plot(nicwt)
+cooks.distance(nicwt) # Bull Durham = 3.5106
+par(mfrow = c(1,1))
+plot(rstudent(nicwt)) # Bull Durham = < -3
+```
+
+### Tar and weight plus interaction term NOTE: based on correlations, tar and nicotine are basically the same predictors so these models are very similar
+```{r tarWt}
+tarwt<-lm(CO ~ TAR + WEIGHT + TAR:WEIGHT, data = cigs)
+summary(tarwt)
+print("Variance Inflation Factors")
+vif(tarwt)
+
+# predictions based on the model with interaction term to show fit in plot
+cigs$TWpreds <- predict(tarwt, cigs)
+
+ggplot(data = cigs, mapping = aes(y = CO, x = TAR)) +
+  geom_point() +
+  geom_smooth(aes(y = TWpreds, x = TAR), method = "lm", se = TRUE, color = "red") +
+  labs(title = "CO by TAR + Weight + TAR:Weight") +
+  theme_minimal()
+
+ggplot(data = cigs, mapping = aes(y = hatvalues(tarwt), x = BRAND)) +
+  geom_point() +
+  theme_minimal() +
+  geom_hline(aes(yintercept = mean(hatvalues(tarwt)), linetype = "mean leverage"), color = "red") +
+  theme(legend.title = element_blank()) +
+  theme(axis.text.x = element_text(hjust=1, angle = 45, size = 11))
+
+hatvalues(tarwt)
+meanLevClean<-mean(hatvalues(tarwt))
+meanLevClean
+par(mfrow = c(2,2))
+plot(tarwt)
+cooks.distance(nicwt) # Bull Durham = 3.5106
+par(mfrow = c(1,1))
+plot(rstudent(nicwt)) # Bull Durham = < -3
+```
+
+### Filtering out Bull Durham Sample
+```{r noOuts}
+cleanCigs<-cigs %>% 
+  filter(TAR < 29.8)
+
+cor.test(cleanCigs$CO, cleanCigs$TAR, method = "pearson")
+cor.test(cleanCigs$CO, cleanCigs$NICOTINE, method = "pearson")
+cor.test(cleanCigs$TAR, cleanCigs$NICOTINE, method = "pearson")
+```
+
+
+### Refitting Without Bull Durham
+```{r}
+tarWtMod<-lm(CO~TAR + WEIGHT +TAR:WEIGHT, data = cleanCigs)
+summary(tarWtMod)
+
+nicWtMod<-lm(CO~NICOTINE + NICOTINE:WEIGHT, data = cleanCigs)
+summary(nicWtMod)
+
+taronly<-lm(CO~TAR, data = cleanCigs)
+summary(taronly)
+
+tarnic<-lm(CO~TAR + NICOTINE +TAR:NICOTINE, data = cleanCigs)
+summary(tarnic)
+
+allthree <- lm(CO~TAR + WEIGHT + NICOTINE, data = cleanCigs)
+summary(allthree)
+# Nicotine is unnecessary when tar is in the model
+print("VIF for the tar + weight + tar:weight model")
+vif(tarWtMod)
+print("VIF for the nicotine + weight + nicotine:weight model")
+vif(nicWtMod)
+print("VIF for the tar + nicotine model")
+vif(tarnic)
+print("VIF for the full model")
+vif(allthree)
+
+```
+
+### Corplot Without Bull Durham
+```{r corr}
+pdf("/Users/leekapp/Desktop/STAT288CigProject/corrplot.png")
+corrplot(cor(cleanCigs[c(2:5)]), method = "square", addCoef.col = "red")
+dev.off()
+# expect multicollinearity between tar and nicotine
+
+# Partial correlation tests with Bull Durham sammple
+# Correlation between CO and TAR controlling for Nicotine
+pcor.test(cleanCigs$CO, cleanCigs$TAR, cleanCigs["NICOTINE"])
+# Correlation between CO and Nicotine controlling for Tar
+pcor.test(cleanCigs$CO, cleanCigs$NICOTINE, cleanCigs["TAR"])
+# Correlation between CO and Weight controlling for Tar and Nicotine
+pcor.test(cleanCigs$CO, cleanCigs$WEIGHT, cleanCigs[,c("TAR","NICOTINE")])
+```
+
+### No interaction terms are significant without the Bull Durham sample
+The Multiple R-squared for the tar only model is 0.9335
+The Multiple R-squared for the tar + weight + tar:weight model is 0.9359
+
+### Plot of tar only model without Bull Durham sample
+```{r simpleMod}
+ggplot(data = cleanCigs, mapping = aes(x = TAR, y = CO, color = WEIGHT)) +
+  geom_point(size = 2)+
+  labs(title = "CO vs. Tar by Weight", x = "Tar (g)", y = "CO (mg)") +
+  theme_minimal() +
+  geom_smooth(method = 'lm', formula = y~x)
+ggsave("/Users/leekapp/Desktop/STAT288CigProject/tarOnly.png")
+```
+
+### Tar only model goodness of fit measures
+```{r analytics}
+ggplot(data = cleanCigs, mapping = aes(x = BRAND, y = taronly$residuals)) +
+  geom_point() +
+  theme_minimal(base_size = 14) +
+  geom_hline(aes(yintercept = 0), color = "red") +
+  labs(title = "Residuals for Tar-Only Model", x = "Brand", y = "Residuals") +
+  theme(axis.text.x = element_text(hjust = 1, vjust = 0.25, angle = 90, size = 11))
+ggsave("/Users/leekapp/Desktop/STAT288CigProject/tarOnlyResids.png")
+
+ggplot(data = cleanCigs, mapping = aes(x = BRAND, y = hatvalues(taronly))) +
+  geom_point() +
+  theme_minimal(base_size = 14) +
+  geom_hline(aes(yintercept = mean(hatvalues(taronly)), linetype = "mean leverage"), color = "red") +
+  labs(title = "Leverages for Tar-Only Model", x = "Brand", y = "Leverages") +
+  theme(axis.text.x = element_text(hjust = 1, vjust = 0.25, angle = 90, size = 11))
+ggsave("/Users/leekapp/Desktop/STAT288CigProject/tarOnlyLevs.png")
+
+ggplot(data = cleanCigs, mapping = aes(x = BRAND, y = cooks.distance(taronly))) +
+  geom_point() +
+  theme_minimal(base_size = 14) +
+  labs(title = "Cook's Distances for Tar-Only Model", x = "Brand", y = "Cook's Distance") +
+  theme(axis.text.x = element_text(hjust = 1, vjust = 0.25, angle = 90, size = 11))
+ggsave("/Users/leekapp/Desktop/STAT288CigProject/tarOnlyCooks.png")
+```
+
+
+
