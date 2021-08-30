@@ -1,7 +1,5 @@
 <!-- This is the README for the STAT288 cigarette project repository -->
 
-# STAT 288 Multivariable Multiple Regression
-
 ## Data are from the Federal Trade Commission ratings of cigarettes for tar, CO, and nicotine content (year unknown)
 
 The goal of this assignment was to provide a statistical analysis of the cigarette data for a stakeholder, such as the U.S. Surgeon General or another party interested in predicting quantities of chemicals in second hand smoke.  We were supposed to obtain what we felt was the best model predicting carbon monoxide yield based on tar, nicotine, and cigarette weight.
