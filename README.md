@@ -1,6 +1,6 @@
 <!-- This is the README for the STAT288 cigarette project repository -->
 
-# STAT 288 Multivariable Multiple Regression
+# STAT 288 (Statistical Learning) Multivariable Multiple Regression
 
 ## Data are from the Federal Trade Commission ratings of cigarettes for tar, CO, and nicotine content (year unknown)
 
