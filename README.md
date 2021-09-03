@@ -39,7 +39,7 @@ CO = 1.4128 + 0.9281(Tar)
 R<sup>2</sup> = 0.9335  
 F statistic = 308.6 on 1 and 22 DF (p-value: 1.964 x 10<sup>-14</sup>)  
 
-<img src="images/taronly.png" width=500px>
+<img src="images/tarOnly.png" width=500px>
 
 The model with tar as the sole predictor is the best model.  Including nicotine, the only other significant predictor when present alone, plus the interaction term tar:nicotine raises the R<sup>2</sup> by 1.1% to 0.9342.  Given the absence of any real improvement in the model's accuracy and the strong correlation between tar and nicotine, it is unclear that nicotine is independently predicting CO yield in this more complicated model.  Thus, we favor the simplest but effective model with tar as the only predictor of CO yield and we note that no patterns among the residuals of this simpler model are evident.
 
