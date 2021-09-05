@@ -2,7 +2,7 @@
 
 ## Data are from the Federal Trade Commission ratings of cigarettes for tar, CO, and nicotine content (year unknown)
 
-The goal of this assignment was to provide a statistical analysis of the cigarette data for a stakeholder, such as the U.S. Surgeon General or another party interested in predicting quantities of chemicals in second hand smoke.  We were supposed to obtain what we felt was the best model predicting carbon monoxide yield based on tar, nicotine, and cigarette weight.
+*The goal of this assignment was to provide a statistical analysis of the cigarette data for a stakeholder, such as the U.S. Surgeon General or another party interested in predicting quantities of chemicals in second hand smoke.  We were supposed to obtain what we felt was the best model predicting carbon monoxide yield based on tar, nicotine, and cigarette weight.*
 
 The data consist of individual cigarettes representing 25 brands that were analyzed for their weight, tar, nicotine, and CO yield.  One sample is an outlier, the Bull Durham sample.  This cigarette  accounts for all maximum values shown in the table of descriptive statistics, and for reasons discussed below, the Bull Durham sample was excluded from our analyses.
 
